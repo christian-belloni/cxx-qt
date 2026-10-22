@@ -231,6 +231,39 @@ impl GeneratedCpp {
             cpp.write_all(source_generated.as_bytes())
                 .expect("Could not write cxx-qt source file");
             cpp_file_paths.qobject = Some(cpp_path);
+        } else {
+            // We don't know when starting a build if cxxqt.* files will be valid but some build
+            // systems require to declare all input/output files at analysis time
+
+            let header_path = PathBuf::from(format!(
+                "{}/{}.cxxqt.h",
+                header_directory.display(),
+                self.file_ident
+            ));
+            let cpp_path = PathBuf::from(format!(
+                "{}/{}.cxxqt.cpp",
+                cpp_directory.display(),
+                self.file_ident
+            ));
+
+            if let Some(directory) = cpp_path.parent() {
+                std::fs::create_dir_all(directory)
+                    .expect("Could not create directory to write cxx-qt generated files");
+            }
+
+            std::fs::OpenOptions::new()
+                .create(true)
+                .write(true)
+                .truncate(true)
+                .open(&header_path)
+                .expect("Could not write cxx-qt source file");
+
+            std::fs::OpenOptions::new()
+                .create(true)
+                .write(true)
+                .truncate(true)
+                .open(&cpp_path)
+                .expect("Could not write cxx-qt source file");
         }
 
         let header_path = PathBuf::from(format!(
