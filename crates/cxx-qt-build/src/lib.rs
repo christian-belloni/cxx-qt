@@ -1140,6 +1140,27 @@ extern "C" bool {init_fun}() {{
         }
     }
 
+    fn generate_call_initializers(
+        &mut self,
+        public_initializer: &qt_build_utils::Initializer,
+        key: &str,
+    ) {
+        let init_call = format!(
+            "{declaration}\nstatic const bool do_init_{key} = {init_call}",
+            declaration = public_initializer
+                .init_declaration
+                .clone()
+                .unwrap_or_default(),
+            init_call = public_initializer
+                .init_call
+                .clone()
+                .expect("Public initializer must be callable!"),
+        );
+
+        let init_file = dir::initializers(key).join("call-initializers.cpp");
+        std::fs::write(&init_file, init_call).expect("Could not write initializers call file!");
+    }
+
     fn build_initializers<'a>(
         &mut self,
         private_initializers: impl IntoIterator<Item = &'a qt_build_utils::Initializer>,
@@ -1370,6 +1391,7 @@ extern "C" bool {init_fun}() {{
 
         let public_initializer =
             Self::generate_public_initializer(&private_initializers, &crate_init_key());
+        self.generate_call_initializers(&public_initializer, &crate_init_key());
 
         Interface {
             manifest: Manifest {
