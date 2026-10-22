@@ -251,19 +251,15 @@ impl GeneratedCpp {
                     .expect("Could not create directory to write cxx-qt generated files");
             }
 
-            std::fs::OpenOptions::new()
-                .create(true)
-                .write(true)
-                .truncate(true)
-                .open(&header_path)
-                .expect("Could not write cxx-qt source file");
+            if let Some(directory) = header_path.parent() {
+                std::fs::create_dir_all(directory)
+                    .expect("Could not create directory to write cxx-qt generated files");
+            }
 
-            std::fs::OpenOptions::new()
-                .create(true)
-                .write(true)
-                .truncate(true)
-                .open(&cpp_path)
-                .expect("Could not write cxx-qt source file");
+            println!("{}", header_path.display());
+
+            File::create(&header_path).expect("Could not write cxx-qt source file");
+            File::create(&cpp_path).expect("Could not write cxx-qt source file");
         }
 
         let header_path = PathBuf::from(format!(
