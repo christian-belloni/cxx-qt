@@ -16,6 +16,7 @@ pub(crate) fn find_prl_for_qt_module(
     path_lib: PathBuf,
     qt_version: &semver::Version,
 ) -> Option<PathBuf> {
+    let mut tried = Vec::new();
     let version_major = qt_version.major;
     // TODO: should this instead read the CARGO_CFG_TARGET_* for the arch?
     for arch in ["_arm64-v8a", "_armeabi-v7a", "_x86", "_x86_64", ""] {
@@ -25,6 +26,12 @@ pub(crate) fn find_prl_for_qt_module(
         if prl_path.exists() {
             return Some(prl_path);
         }
+        tried.push(prl_path);
+    }
+
+    println!("failed to retrieve prl path, tried:");
+    for path in tried {
+        println!("{}", path.display());
     }
 
     None
